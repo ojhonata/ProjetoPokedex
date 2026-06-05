@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:projeto2_pokemon/pokemon.dart';
 
@@ -56,17 +57,12 @@ class _TelaDetalhesState extends State<TelaDetalhes> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Imagem (uso de Image.network para evitar dependência externa)
-            SizedBox(
+            // Imagem com cache
+            CachedNetworkImage(
+              imageUrl: p.urlImagem,
               height: 200,
-              child: Image.network(
-                p.urlImagem,
-                fit: BoxFit.contain,
-                loadingBuilder: (context, child, loadingProgress) {
-                  if (loadingProgress == null) return child;
-                  return const Center(child: CircularProgressIndicator());
-                },
-              ),
+              placeholder: (context, url) => const CircularProgressIndicator(),
+              errorWidget: (context, url, error) => const Icon(Icons.catching_pokemon, size: 100),
             ),
             const SizedBox(height: 16),
 
@@ -78,9 +74,9 @@ class _TelaDetalhesState extends State<TelaDetalhes> {
             // Peso e altura em cards lado a lado
             Row(
               children: [
-                _card('Peso', '${(p.peso / 10).toStringAsFixed(1)} kg', Icons.monitor_weight_outlined),
+                _card('Peso', '${p.peso.toStringAsFixed(1)} kg', Icons.monitor_weight_outlined),
                 const SizedBox(width: 12),
-                _card('Altura', '${(p.altura / 10).toStringAsFixed(1)} m', Icons.height),
+                _card('Altura', '${p.altura.toStringAsFixed(1)} m', Icons.height),
               ],
             ),
             const SizedBox(height: 12),
@@ -102,7 +98,7 @@ class _TelaDetalhesState extends State<TelaDetalhes> {
                 onPressed: _alternarFavorito,
                 icon: Icon(_ehFavorito ? Icons.star : Icons.star_border),
                 label: Text(_ehFavorito ? 'Remover dos Favoritos' : 'Salvar nos Favoritos'),
-                style: FilledButton.styleFrom(backgroundColor: _ehFavorito ? Colors.amber[700] : null),
+                style: FilledButton.styleFrom(backgroundColor: _ehFavorito ? Colors.amber : null),
               ),
             ),
           ],
@@ -123,7 +119,7 @@ class _TelaDetalhesState extends State<TelaDetalhes> {
         child: Column(children: [
           Icon(icone, color: Colors.red),
           const SizedBox(height: 4),
-          Text(label, style: TextStyle(color: Colors.black)),
+          Text(label, style: TextStyle(color: Colors.grey[600])),
           Text(valor, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         ]),
       ),

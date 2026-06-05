@@ -1,5 +1,5 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-// removed cached_network_image dependency to avoid missing package error
 import 'package:projeto2_pokemon/pokemon.dart';
 import 'package:projeto2_pokemon/tela_detalhes.dart';
 
@@ -109,7 +109,8 @@ class _TelaListaState extends State<TelaLista> {
           child: NotificationListener<ScrollNotification>(
             onNotification: (scroll) {
               // Carrega mais ao chegar perto do fim da lista
-              if (!_modosBusca && scroll.metrics.pixels >= scroll.metrics.maxScrollExtent - 200) {
+              bool chegouNoFim = scroll.metrics.pixels >= scroll.metrics.maxScrollExtent - 200;
+              if (!_modosBusca && chegouNoFim) {
                 _carregarMais();
               }
               return false;
@@ -127,22 +128,11 @@ class _TelaListaState extends State<TelaLista> {
 
                 return ListTile(
                   // Imagem com cache (biblioteca cached_network_image do pub.dev)
-                  leading: SizedBox(
-                    width: 56,
-                    height: 56,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.network(
-                        p.urlImagem,
-                        width: 56,
-                        height: 56,
-                        fit: BoxFit.cover,
-                        loadingBuilder: (context, child, loadingProgress) {
-                          if (loadingProgress == null) return child;
-                          return const SizedBox(width: 56, height: 56, child: Center(child: CircularProgressIndicator()));
-                        },
-                      ),
-                    ),
+                  leading: CachedNetworkImage(
+                    imageUrl: p.urlImagem,
+                    width: 56, height: 56,
+                    placeholder: (context, url) => const SizedBox(width: 56, height: 56, child: CircularProgressIndicator()),
+                    errorWidget: (context, url, error) => const Icon(Icons.catching_pokemon, size: 40),
                   ),
                   title: Text(nome, style: const TextStyle(fontWeight: FontWeight.bold)),
                   subtitle: Row(
@@ -151,14 +141,13 @@ class _TelaListaState extends State<TelaLista> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                         decoration: BoxDecoration(
-                          color: _coresTipo[t] ?? Colors.black,
+                          color: _coresTipo[t] ?? Colors.grey,
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(t.toUpperCase(), style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold)),
                       ),
                     )).toList(),
                   ),
-                  trailing: Text('#${p.id.toString().padLeft(3, '0')}', style: TextStyle(color: Colors.grey[600])),
                   // Navega para TelaDetalhes passando o pokemon como parâmetro
                   onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => TelaDetalhes(pokemon: p))),
                 );

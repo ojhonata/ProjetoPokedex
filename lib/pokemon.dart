@@ -28,8 +28,7 @@ class Pokemon {
       peso: json['weight'],
       altura: json['height'],
       tipos: (json['types'] as List).map((t) => t['type']['name'] as String).toList(),
-      urlImagem:
-          'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${json['id']}.png',
+      urlImagem: json['sprites']['front_default'] ?? '',
     );
   }
 
@@ -82,28 +81,28 @@ class DataAccessObject {
     );
   }
 
-  // C: Salva um Pokémon nos favoritos
+  // Salva um Pokémon nos favoritos
   static Future<void> salvarFavorito(Pokemon pokemon) async {
     final db = await DataAccessObject.db();
     await db.insert('favoritos', pokemon.toMap(),
         conflictAlgorithm: sql.ConflictAlgorithm.replace);
   }
 
-  // R: Retorna todos os favoritos
+  // Retorna todos os favoritos
   static Future<List<Pokemon>> obterFavoritos() async {
     final db = await DataAccessObject.db();
     final maps = await db.query('favoritos', orderBy: 'nome');
     return maps.map((map) => Pokemon.fromMap(map)).toList();
   }
 
-  // R: Verifica se um Pokémon já é favorito
+  // Verifica se um Pokémon já é favorito
   static Future<bool> ehFavorito(int id) async {
     final db = await DataAccessObject.db();
     final resultado = await db.query('favoritos', where: 'id = ?', whereArgs: [id]);
     return resultado.isNotEmpty;
   }
 
-  // D: Remove um Pokémon dos favoritos
+  // Remove um Pokémon dos favoritos
   static Future<void> removerFavorito(int id) async {
     final db = await DataAccessObject.db();
     try {
